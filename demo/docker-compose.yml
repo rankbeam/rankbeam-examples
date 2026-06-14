@@ -1,0 +1,33 @@
+# Rankbeam SEO — one-command prospect demo.
+#
+#   cd demo
+#   docker compose up --build         # free MIT core: metadata, schema, sitemaps
+#
+# To include Pro (the technical-SEO audit), pass your license credentials via
+# the COMPOSER_AUTH environment variable and build with the Pro arg:
+#
+#   export COMPOSER_AUTH='{"http-basic":{"laravel-seo-pro.composer.sh":{"username":"you@example.com","password":"YOUR-LICENSE-KEY"}}}'
+#   WITH_PRO=true docker compose up --build
+#
+# COMPOSER_AUTH is passed as a BuildKit secret, never baked into an image layer.
+# Leave it unset for the core build — the secret is optional there. Requires
+# Docker BuildKit (default on modern Docker).
+
+services:
+  demo:
+    build:
+      context: ..
+      dockerfile: demo/Dockerfile
+      args:
+        WITH_PRO: ${WITH_PRO:-false}
+      secrets:
+        - composer_auth
+    ports:
+      - "8080:8080"
+    environment:
+      APP_URL: http://localhost:8080
+
+secrets:
+  composer_auth:
+    # Read only by the Pro build; harmless/empty for the core build.
+    environment: COMPOSER_AUTH

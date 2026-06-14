@@ -1,0 +1,27 @@
+{
+    "name": "rankbeam/examples-shared",
+    "description": "Shared model + seeder + SEO helper for the rankbeam-examples reference apps. Not published — local path package only.",
+    "type": "library",
+    "license": "MIT",
+    "version": "1.0.0",
+    "require": {
+        "php": "^8.2",
+        "illuminate/database": "^11.0 || ^12.0 || ^13.0",
+        "illuminate/support": "^11.0 || ^12.0 || ^13.0",
+        "rankbeam/laravel-seo": "^2.0@dev || ^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rankbeam\\Examples\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Rankbeam\\Examples\\ExamplesServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

@@ -1,0 +1,27 @@
+name: lint
+
+# Fast, every-PR sanity for the examples repo: the contract specs and the shared
+# fixtures must load and parse. This does NOT boot any app or browser — the
+# renderer's correctness is proven by laravel-seo's own `tests.yml` (the fast
+# required job, every push), and the browser matrix runs on a schedule.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  specs-load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install e2e deps
+        working-directory: e2e
+        run: npm ci
+      - name: Validate fixtures parse and every spec loads
+        working-directory: e2e
+        run: npx playwright test --list

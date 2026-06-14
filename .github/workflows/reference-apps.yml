@@ -1,0 +1,183 @@
+name: reference-apps (browser + SSR matrix)
+
+# The heavy leg: boot each reference app for real and prove the Rendering
+# Contract in a browser (and, for Inertia, in raw SSR HTML). This is
+# intentionally NOT on every push — it is slow and stack-heavy. It runs:
+#   - weekly on a schedule,
+#   - on demand (workflow_dispatch),
+#   - on PRs that change the example apps / shared package / e2e themselves.
+# The fast renderer guarantees live in laravel-seo's tests.yml (every push);
+# see docs/what-is-tested-where.md.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Mondays 06:00 UTC
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - 'e2e/**'
+      - '.github/workflows/reference-apps.yml'
+
+# Pinned toolchain — reproducibility over freshness.
+#   PHP 8.4, Node 22 LTS, Chromium pinned by the @playwright/test version in
+#   e2e/package.json (1.60.0). nesbot/carbon is pinned to 3.11.* in every app's
+#   composer.json (3.12.0 broke the Carbon::plus() signature vs Laravel 12.62).
+env:
+  PHP_VERSION: '8.4'
+  NODE_VERSION: '22'
+
+concurrency:
+  group: reference-apps-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Blade: pure server-render, no JS build ────────────────────────────────
+  blade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: rankbeam-examples }
+      # Until Core 3 is published, the apps install the core working tree via a
+      # composer path repo (../../../laravel-seo). On release this whole step is
+      # replaced by `composer require rankbeam/laravel-seo:^3.0` from Packagist.
+      - uses: actions/checkout@v4
+        with: { repository: rankbeam/laravel-seo, ref: master, path: laravel-seo }
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite
+          coverage: none
+      - uses: actions/setup-node@v4
+        with: { node-version: '${{ env.NODE_VERSION }}' }
+      - name: Install app
+        working-directory: rankbeam-examples/apps/blade
+        run: |
+          composer install --no-interaction --no-progress
+          cp .env.example .env
+          php artisan key:generate
+          php artisan migrate --seed --force
+      - name: Serve
+        working-directory: rankbeam-examples/apps/blade
+        run: php artisan serve --host=127.0.0.1 --port=8210 &
+      - name: e2e
+        working-directory: rankbeam-examples/e2e
+        env:
+          CI: 'true'
+          BLADE_URL: http://127.0.0.1:8210
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npx wait-on http://127.0.0.1:8210/up
+          npx playwright test --project=blade
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with: { name: blade-report, path: rankbeam-examples/e2e/playwright-report, retention-days: 7 }
+
+  # ── Inertia: Vue / React / Svelte — client build + SSR server ──────────────
+  inertia:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - stack: inertia-vue
+            port: 8211
+            project: inertia-vue
+            ssr_env: INERTIA_VUE_SSR_URL
+            url_env: INERTIA_VUE_URL
+          - stack: inertia-react
+            port: 8212
+            project: inertia-react
+            ssr_env: INERTIA_REACT_SSR_URL
+            url_env: INERTIA_REACT_URL
+          - stack: inertia-svelte
+            port: 8213
+            project: inertia-svelte
+            ssr_env: INERTIA_SVELTE_SSR_URL
+            url_env: INERTIA_SVELTE_URL
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: rankbeam-examples }
+      - uses: actions/checkout@v4
+        with: { repository: rankbeam/laravel-seo, ref: master, path: laravel-seo }
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite
+          coverage: none
+      - uses: actions/setup-node@v4
+        with: { node-version: '${{ env.NODE_VERSION }}' }
+      - name: Install + build app
+        working-directory: rankbeam-examples/apps/${{ matrix.stack }}
+        run: |
+          composer install --no-interaction --no-progress
+          cp .env.example .env
+          php artisan key:generate
+          php artisan migrate --seed --force
+          npm ci
+          npm run build   # builds the client bundle AND the SSR bundle
+      - name: Serve + SSR
+        working-directory: rankbeam-examples/apps/${{ matrix.stack }}
+        run: |
+          php artisan serve --host=127.0.0.1 --port=${{ matrix.port }} &
+          php artisan inertia:start-ssr &
+      - name: e2e
+        working-directory: rankbeam-examples/e2e
+        env:
+          CI: 'true'
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npx wait-on http://127.0.0.1:${{ matrix.port }}/up
+          # With the SSR server up, the normal URL returns SSR HTML, so the SSR
+          # leg targets the same base URL (JS-disabled context).
+          export ${{ matrix.url_env }}=http://127.0.0.1:${{ matrix.port }}
+          export ${{ matrix.ssr_env }}=http://127.0.0.1:${{ matrix.port }}
+          npx playwright test --project=${{ matrix.project }}
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with: { name: ${{ matrix.stack }}-report, path: rankbeam-examples/e2e/playwright-report, retention-days: 7 }
+
+  # ── Livewire: server-render + wire:navigate, no JS build ───────────────────
+  livewire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: rankbeam-examples }
+      - uses: actions/checkout@v4
+        with: { repository: rankbeam/laravel-seo, ref: master, path: laravel-seo }
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite
+          coverage: none
+      - uses: actions/setup-node@v4
+        with: { node-version: '${{ env.NODE_VERSION }}' }
+      - name: Install app
+        working-directory: rankbeam-examples/apps/livewire
+        run: |
+          composer install --no-interaction --no-progress
+          cp .env.example .env
+          php artisan key:generate
+          php artisan migrate --seed --force
+      - name: Serve
+        working-directory: rankbeam-examples/apps/livewire
+        run: php artisan serve --host=127.0.0.1 --port=8214 &
+      - name: e2e
+        working-directory: rankbeam-examples/e2e
+        env:
+          CI: 'true'
+          LIVEWIRE_URL: http://127.0.0.1:8214
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npx wait-on http://127.0.0.1:8214/up
+          npx playwright test --project=livewire
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with: { name: livewire-report, path: rankbeam-examples/e2e/playwright-report, retention-days: 7 }

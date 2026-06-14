@@ -1,0 +1,18 @@
+{
+  "name": "rankbeam-examples-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Playwright browser + SSR proof of the Rankbeam Rendering Contract across every front-end stack.",
+  "scripts": {
+    "test": "playwright test",
+    "test:blade": "playwright test --project=blade",
+    "test:inertia": "playwright test --project=inertia-vue --project=inertia-react --project=inertia-svelte",
+    "test:livewire": "playwright test --project=livewire",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.60.0",
+    "wait-on": "8.0.1"
+  }
+}

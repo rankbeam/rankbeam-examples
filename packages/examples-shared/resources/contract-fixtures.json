@@ -1,0 +1,167 @@
+{
+    "_comment": "SINGLE SOURCE OF TRUTH for the RT5 framework proof matrix. Read by both the PHP ContractSeeder (to seed every stack identically) and the Playwright assertion library (to assert exact resolved values). Keeping seeder + assertions on one file means the e2e cannot silently drift from what the app actually renders. Mirrors the unit fixture richSeo() in laravel-seo/tests/Unit/Services/RenderingContractTest.php. `path` fields are templates absolutized against the app base URL by both readers.",
+    "config": {
+        "site_name": "Rankbeam",
+        "title_suffix": " | Rankbeam",
+        "default_robots": "index,follow",
+        "twitter_site": "@rankbeam",
+        "default_og_image": "/images/og-default.jpg"
+    },
+    "pages": [
+        {
+            "key": "rich",
+            "model": "post",
+            "path": "/blog/canonical-urls",
+            "nav_label": "Canonical URLs (rich article)",
+            "model_attributes": {
+                "title": "How Canonical URLs Work",
+                "slug": "canonical-urls",
+                "excerpt": "A practical guide to canonical tags.",
+                "content": "<p>Canonical tags tell search engines which URL is authoritative when the same content is reachable at several addresses.</p>",
+                "featured_image": "https://images.rankbeam.test/og/canonical.jpg",
+                "author_name": "Jane Doe",
+                "category": "SEO",
+                "tags": ["canonical", "seo"],
+                "published_at": "2026-06-01T10:00:00+00:00",
+                "is_indexable": true
+            },
+            "seo_meta": {
+                "og_title": "How Canonical URLs Work",
+                "og_type": "article",
+                "twitter_title": "How Canonical URLs Work",
+                "locale": "en-US",
+                "schema_jsonld": {
+                    "@context": "https://schema.org",
+                    "@type": "Article",
+                    "headline": "How Canonical URLs Work",
+                    "author": { "@type": "Person", "name": "Jane Doe" },
+                    "description": "Canonicals, \"quotes\" & </script> end-tag XSS-safety check"
+                }
+            },
+            "alternates": [
+                { "hreflang": "en-US", "path": "/blog/canonical-urls" },
+                { "hreflang": "fr-FR", "path": "/fr/blog/canonical-urls" },
+                { "hreflang": "x-default", "path": "/blog/canonical-urls" }
+            ],
+            "expect": {
+                "title": "How Canonical URLs Work | Rankbeam",
+                "description": "A practical guide to canonical tags.",
+                "canonical_path": "/blog/canonical-urls",
+                "robots_present": false,
+                "og": {
+                    "title": "How Canonical URLs Work",
+                    "description": "A practical guide to canonical tags.",
+                    "type": "article",
+                    "locale": "en_US",
+                    "site_name": "Rankbeam",
+                    "image": "https://images.rankbeam.test/og/canonical.jpg"
+                },
+                "article": {
+                    "present": true,
+                    "author": "Jane Doe",
+                    "section": "SEO",
+                    "tags": ["canonical", "seo"],
+                    "published_time": "2026-06-01T10:00:00+00:00",
+                    "modified_present": true
+                },
+                "twitter": {
+                    "card": "summary_large_image",
+                    "title": "How Canonical URLs Work",
+                    "description": "A practical guide to canonical tags.",
+                    "image": "https://images.rankbeam.test/og/canonical.jpg",
+                    "site": "@rankbeam",
+                    "creator_present": false
+                },
+                "schema": { "present": true, "type": "Article", "headline": "How Canonical URLs Work" },
+                "hreflang": ["en-US", "fr-FR", "x-default"]
+            }
+        },
+        {
+            "key": "bare",
+            "model": "page",
+            "path": "/pages/bare-minimum",
+            "nav_label": "Bare minimum (teardown target)",
+            "model_attributes": {
+                "title": "Bare Minimum",
+                "slug": "bare-minimum",
+                "excerpt": null,
+                "content": null,
+                "is_indexable": true
+            },
+            "seo_meta": {
+                "locale": "en-US"
+            },
+            "alternates": [],
+            "expect": {
+                "title": "Bare Minimum | Rankbeam",
+                "description_present": false,
+                "canonical_path": "/pages/bare-minimum",
+                "robots_present": false,
+                "og": {
+                    "title": "Bare Minimum | Rankbeam",
+                    "description": null,
+                    "type": "website",
+                    "locale": "en_US",
+                    "site_name": "Rankbeam",
+                    "image": "/images/og-default.jpg"
+                },
+                "article": { "present": false },
+                "twitter": {
+                    "card": "summary_large_image",
+                    "title": "Bare Minimum | Rankbeam",
+                    "description": null,
+                    "image": "/images/og-default.jpg",
+                    "site": "@rankbeam",
+                    "creator_present": false
+                },
+                "schema": { "present": false },
+                "hreflang": []
+            }
+        },
+        {
+            "key": "noindex",
+            "model": "page",
+            "path": "/pages/private-draft",
+            "nav_label": "Private draft (noindex)",
+            "model_attributes": {
+                "title": "Private Draft",
+                "slug": "private-draft",
+                "excerpt": "An unpublished draft that must never be indexed.",
+                "content": null,
+                "is_indexable": false
+            },
+            "seo_meta": {
+                "robots": "noindex,nofollow",
+                "locale": "en-US"
+            },
+            "alternates": [],
+            "expect": {
+                "title": "Private Draft | Rankbeam",
+                "description": "An unpublished draft that must never be indexed.",
+                "canonical_path": "/pages/private-draft",
+                "robots_present": true,
+                "robots_value": "noindex,nofollow",
+                "og": {
+                    "title": "Private Draft | Rankbeam",
+                    "description": "An unpublished draft that must never be indexed.",
+                    "type": "website",
+                    "locale": "en_US",
+                    "site_name": "Rankbeam",
+                    "image": "/images/og-default.jpg"
+                },
+                "article": { "present": false },
+                "twitter": {
+                    "card": "summary_large_image",
+                    "title": "Private Draft | Rankbeam",
+                    "description": "An unpublished draft that must never be indexed.",
+                    "image": "/images/og-default.jpg",
+                    "site": "@rankbeam",
+                    "creator_present": false
+                },
+                "schema": { "present": false },
+                "hreflang": []
+            }
+        }
+    ],
+    "nav_order": ["rich", "bare", "noindex"]
+}

@@ -1,0 +1,35 @@
+# PHP
+/apps/*/vendor
+/packages/*/vendor
+composer.phar
+
+# Node
+node_modules
+/apps/*/public/build
+/apps/*/public/hot
+/apps/*/bootstrap/ssr
+
+# Laravel runtime
+/apps/*/.env
+/apps/*/storage/*.key
+/apps/*/storage/framework/cache/data/*
+/apps/*/storage/framework/sessions/*
+/apps/*/storage/framework/views/*
+/apps/*/storage/logs/*
+!/apps/*/storage/**/.gitkeep
+/apps/*/bootstrap/cache/*
+!/apps/*/bootstrap/cache/.gitkeep
+
+# SQLite (re-created by migrate --seed)
+*.sqlite
+*.sqlite-journal
+
+# Playwright
+/e2e/node_modules
+/e2e/playwright-report
+/e2e/test-results
+/e2e/blob-report
+
+# OS / editor
+.DS_Store
+Thumbs.db
