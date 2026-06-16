@@ -27,7 +27,7 @@ gate; if it is red, the renderer is wrong.
 **Where:** this repo → `.github/workflows/reference-apps.yml` → `e2e/` Playwright.
 
 **What:** the clauses that only a real DOM / real HTTP response can prove — the
-ones the contract's §7 table marks **Browser (RT5)**:
+ones the contract's §7 table marks **Browser**:
 
 - consistent canonical normalization (query-strip), self-referencing canonical,
   **noindex isolation**;

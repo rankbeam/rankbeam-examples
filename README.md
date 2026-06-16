@@ -13,18 +13,18 @@ source code.
 
 ## The apps
 
-| App | Stack | How the head reaches the DOM | Demo-ready |
-|---|---|---|---|
-| [`apps/blade`](apps/blade) | Blade (server-render) | `TagRenderer::render()` in the layout | ✅ |
-| [`apps/inertia-vue`](apps/inertia-vue) | Inertia + Vue | `<Head>` + `:head-key` + JSON-LD prop | ✅ |
-| [`apps/inertia-react`](apps/inertia-react) | Inertia + React | `<Head>` + `head-key` + JSON-LD prop | |
-| [`apps/inertia-svelte`](apps/inertia-svelte) | Inertia + Svelte | `<svelte:head>` | |
-| [`apps/livewire`](apps/livewire) | Livewire | `TagRenderer::render()` + `wire:navigate` teardown | |
+| App | Stack | How the head reaches the DOM |
+|---|---|---|
+| [`apps/blade`](apps/blade) | Blade (server-render) | `TagRenderer::render()` in the layout |
+| [`apps/inertia-vue`](apps/inertia-vue) | Inertia + Vue | `<Head>` + `:head-key` + JSON-LD prop |
+| [`apps/inertia-react`](apps/inertia-react) | Inertia + React | `<Head>` + `head-key` + JSON-LD prop |
+| [`apps/inertia-svelte`](apps/inertia-svelte) | Inertia + Svelte | `<svelte:head>` |
+| [`apps/livewire`](apps/livewire) | Livewire | `TagRenderer::render()` + `wire:navigate` teardown |
 
 Each app is the **smallest thing** that renders one model page and navigates
 between several: a rich **article** (every contract surface at once), a **bare**
-page (the teardown target), and a **noindex** page. The `blade` and
-`inertia-vue` apps are marked public-demo-ready (RT11).
+page (the teardown target), and a **noindex** page. The Blade app is also
+packaged as the one-command [prospect demo](#the-prospect-demo) below.
 
 ## The prospect demo
 
@@ -76,26 +76,23 @@ for the exact per-stack steps and ports.
 
 ## Released packages vs. the path overlay (source toggle)
 
-The brief is to install the **released** packages (Pro via its private Composer
-auth). Until Core 3 / Pro 2 are tagged and published, that constraint cannot
-resolve, so the committed apps install the **core working tree** via a path repo
-(`../../../laravel-seo`) — the only thing that resolves today, and the way the
-matrix actually runs green now.
+The committed apps install the core via a Composer **path repo** pointing at a
+sibling `laravel-seo` checkout (`../../../laravel-seo`), so the matrix always
+runs against the exact source under test. The CI workflow checks out
+`laravel-seo` as a sibling for the same reason.
 
-This is a one-line flip on release: replace the path repo + `^3.0@dev` with
-`composer require rankbeam/laravel-seo:^3.0` (and the Pro stacks with the real
-private-Composer auth) and re-lock. The CI workflow checks out `laravel-seo` as
-a sibling for the same reason and carries the same flip note.
+To run a stack against the **released** packages instead, swap the path repo +
+`^3.0@dev` for `composer require rankbeam/laravel-seo:^3.1` (and the Pro stacks
+for the real private-Composer auth) and re-lock.
 
 These reference apps live in their **own repo**, never in any package's
-distribution — so package dists stay clean without needing `export-ignore`
-inside the packages (guardrail #12 is satisfied by separation).
+distribution — so package dists stay clean.
 
 ## Findings surfaced — and fixed
 
 Booting real apps surfaced five defects the unit fixtures never exercised. **All
 are now fixed** and the whole matrix is green against the fixed core (the
-laravel-seo fixes ride **Core 3.0.0-rc**, not yet pushed). Details +
+laravel-seo fixes shipped in **Core 3.0+**). Details +
 before/after in [`docs/findings.md`](docs/findings.md):
 
 1. **`SEO::resolveWithOverrides()` reset `og:type`/`twitter:card`** — fixed:

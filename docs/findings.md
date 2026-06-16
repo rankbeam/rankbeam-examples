@@ -3,7 +3,7 @@
 Booting real apps against the real renderer surfaced behaviours the unit
 fixtures (which construct `SEOData` directly) never exercise. **All of them are
 now fixed** and the whole matrix is green against the fixed core. The package
-fixes ride the planned **Core 3.0.0-rc** (a major) and are not yet pushed.
+fixes shipped in **Core 3.0** (a major release).
 
 ## 1. `SEO::resolveWithOverrides()` reset `og:type` / `twitter:card` — FIXED
 
@@ -50,7 +50,7 @@ produced by the resolver — the `ExampleSeo` augmentation workaround is gone.
 
 ## 4. The Livewire JSON-LD cleanup recipe missed a case — FIXED
 
-Beyond the original `length < 2` early-return (fixed during RT5), the
+Beyond the original `length < 2` early-return (fixed earlier in this matrix work), the
 location-based cleanup still couldn't remove a **same-URL duplicate** Livewire
 re-adds when a page is revisited (e.g. a rich→…→rich tour).
 
