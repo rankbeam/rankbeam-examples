@@ -7,7 +7,7 @@ import { assertCanonicalQueryStrip, assertNoindexIsolation } from '../contract/s
 /**
  * Livewire. The initial full-page render carries the complete crawler-visible
  * head (TagRenderer::render, so JSON-LD is tagged data-seo-schema —
- * requireSchemaMarker is true). The interesting RT5 clause is wire:navigate:
+ * requireSchemaMarker is true). The interesting Livewire clause is wire:navigate:
  * Livewire merges the <head> and treats <script> as a non-removable asset, so
  * JSON-LD accumulates unless torn down. This proves the (corrected,
  * location-based) cleanup snippet removes stale schema — including the case the

@@ -16,7 +16,7 @@
     {{--
         Stock one-liner from the Livewire guide (no hreflang):
             @seo($seoModel ?? null)
-        RT5 renders through TagRenderer::render() with hreflang-augmented SEOData.
+        This app renders through TagRenderer::render() with hreflang-augmented SEOData.
     --}}
     @isset($seo)
         {!! app(\Rankbeam\Seo\Services\TagRenderer::class)->render($seo) !!}

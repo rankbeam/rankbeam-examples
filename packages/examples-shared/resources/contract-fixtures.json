@@ -1,5 +1,5 @@
 {
-    "_comment": "SINGLE SOURCE OF TRUTH for the RT5 framework proof matrix. Read by both the PHP ContractSeeder (to seed every stack identically) and the Playwright assertion library (to assert exact resolved values). Keeping seeder + assertions on one file means the e2e cannot silently drift from what the app actually renders. Mirrors the unit fixture richSeo() in laravel-seo/tests/Unit/Services/RenderingContractTest.php. `path` fields are templates absolutized against the app base URL by both readers.",
+    "_comment": "SINGLE SOURCE OF TRUTH for the framework proof matrix. Read by both the PHP ContractSeeder (to seed every stack identically) and the Playwright assertion library (to assert exact resolved values). Keeping seeder + assertions on one file means the e2e cannot silently drift from what the app actually renders. Mirrors the unit fixture richSeo() in laravel-seo/tests/Unit/Services/RenderingContractTest.php. `path` fields are templates absolutized against the app base URL by both readers.",
     "config": {
         "site_name": "Rankbeam",
         "title_suffix": " | Rankbeam",

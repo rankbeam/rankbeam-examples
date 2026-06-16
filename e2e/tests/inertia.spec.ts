@@ -11,7 +11,7 @@ import { assertCanonicalQueryStrip, assertNoindexIsolation } from '../contract/s
 
 /**
  * Inertia (Vue / React / Svelte). Runs once per stack project. Proves the §7
- * clauses left to RT5 for Inertia: head-key dedup across client navigation (no
+ * clauses assigned to Inertia: head-key dedup across client navigation (no
  * duplicate / no stale singletons, JSON-LD does not accumulate), zero hydration
  * warnings, and — separately, with JavaScript disabled — that SSR emits the full
  * contract in the raw HTTP HTML (§5).

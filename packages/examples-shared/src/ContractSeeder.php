@@ -13,7 +13,7 @@ use Rankbeam\Examples\Models\Post;
  * shared fixtures: a rich article, a bare teardown target, and a noindex page.
  *
  * Every reference app's DatabaseSeeder calls this — "one seeder" across the
- * whole matrix (the RT5 brief). Re-runnable: it truncates first so a re-seed is
+ * whole matrix. Re-runnable: it truncates first so a re-seed is
  * deterministic.
  */
 final class ContractSeeder extends Seeder

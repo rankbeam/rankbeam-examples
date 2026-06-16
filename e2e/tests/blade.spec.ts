@@ -8,7 +8,7 @@ import { assertCanonicalQueryStrip, assertNoindexIsolation } from '../contract/s
  * Blade — classic server-rendered stack. Every page's <head> is in the raw HTTP
  * response, so Blade is the strongest crawler-visibility proof: the contract
  * holds with no JavaScript at all. It also owns the canonical-normalization and
- * noindex-isolation clauses the §7 table leaves to RT5.
+ * noindex-isolation clauses assigned to the Blade reference app.
  */
 test.describe('Blade reference app — Rendering Contract', () => {
   for (const pg of fixtures.pages) {

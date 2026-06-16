@@ -19,7 +19,7 @@
     {{--
         Stock one-liner from the Blade guide (resolves WITHOUT hreflang):
             @seo($model)
-        RT5 renders through the same TagRenderer::render() recipe but feeds it
+        This app renders through the same TagRenderer::render() recipe but feeds it
         SEOData augmented with per-page hreflang (see ExampleSeo / matrix
         README), so this server-rendered <head> carries the full contract,
         hreflang included.
