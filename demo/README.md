@@ -67,11 +67,13 @@ is the `require`/`repositories` block:
 | core | `"rankbeam/laravel-seo": "^3.0@dev"` via path repo | `"rankbeam/laravel-seo": "^3.0"` from Packagist |
 | Pro | — | `"rankbeam/laravel-seo-pro": "^2.0"` via the private repo (`composer.pro.json`) |
 
-> **Status:** this demo is **ready for the release candidates**. Until
-> `rankbeam/laravel-seo` 3.0 is published to Packagist (and Pro 2.0 to the
-> private repo), `composer install` cannot resolve the released constraints, so
-> the build will only succeed once the RCs are cut. The scaffolding, seeder, and
-> the flip are in place; the launch step is publishing the packages.
+> **Status:** both packages are published, so this demo builds today. The free
+> core (`rankbeam/laravel-seo`) is on
+> [Packagist](https://packagist.org/packages/rankbeam/laravel-seo) — the `^3.0`
+> constraint resolves to the current 3.x release — and Pro (`^2.0`) resolves to
+> the current 2.x from its private Composer repository once you supply a license.
+> The `core` build needs nothing but Docker; the Pro build additionally needs a
+> license in `COMPOSER_AUTH`.
 
 ## Notes
 
@@ -80,6 +82,9 @@ is the `require`/`repositories` block:
 - **Out of package artifacts.** This demo lives in the `rankbeam-examples` repo,
   never inside any distributed package — so package dists stay clean by
   separation (guardrail #12).
+- **Compatible versions.** The packages support PHP 8.2+ and Laravel 11–13
+  (Pro adds Filament 4–5 for its dashboard); this demo pins Laravel 12 and
+  `nesbot/carbon 3.11.*` for a deterministic build.
 - **A future `composer create-project rankbeam/demo`** can be cut from this same
-  directory once the packages are public; the Docker path is the zero-setup
-  option in the meantime.
+  directory now that the packages are public; the Docker path stays the
+  zero-setup option in the meantime.

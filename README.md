@@ -11,6 +11,15 @@ source code.
 > server-side PHP tested once in each package's own Pest suite — never here. See
 > [`docs/what-is-tested-where.md`](docs/what-is-tested-where.md).
 
+**Want the proof without cloning anything?**
+
+- [`docs/generated-output.md`](docs/generated-output.md) — the real rendered
+  `<head>` for the reference article (captured through the actual `TagRenderer`)
+  and the live, `@id`-linked JSON-LD graph from a production page.
+- [`docs/migration-proof.md`](docs/migration-proof.md) — a reproducible WordPress
+  import against a committed fixture, showing the dry-run and idempotency
+  behaviour with the real captured console report.
+
 ## The apps
 
 | App | Stack | How the head reaches the DOM |
@@ -82,8 +91,10 @@ runs against the exact source under test. The CI workflow checks out
 `laravel-seo` as a sibling for the same reason.
 
 To run a stack against the **released** packages instead, swap the path repo +
-`^3.0@dev` for `composer require rankbeam/laravel-seo:^3.1` (and the Pro stacks
-for the real private-Composer auth) and re-lock.
+`^3.0@dev` for `composer require rankbeam/laravel-seo:^3.0` (now on
+[Packagist](https://packagist.org/packages/rankbeam/laravel-seo); the Pro stacks
+use the real private-Composer auth) and re-lock. The one-command
+[`demo/`](demo) already does exactly this.
 
 These reference apps live in their **own repo**, never in any package's
 distribution — so package dists stay clean.
