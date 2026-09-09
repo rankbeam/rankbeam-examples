@@ -11,12 +11,23 @@ use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Livewire;
+use Rankbeam\Seo\Data\SEOData;
 use Rankbeam\Seo\Models\SEOMeta;
+use Rankbeam\Seo\Pro\Models\SEOScanResult;
+use Rankbeam\Seo\Pro\Reports\Branding;
+use Rankbeam\Seo\Pro\Reports\ReportDataBuilder;
+use Rankbeam\Seo\Pro\Reports\ReportGenerator;
+use Rankbeam\Seo\Pro\Scanning\PageScanner;
+use Rankbeam\Seo\Pro\Scanning\SeoScorer;
 use Rankbeam\Seo\Services\LlmsTxt\LlmsTxtBuilder;
+use Rankbeam\Seo\Services\OgImage\OgImageGenerator;
+use Rankbeam\Seo\Services\OgImage\OgImageManager;
+use Rankbeam\Seo\Services\SEOResolver;
 use Rankbeam\Seo\Services\Sitemap\SitemapBuilder;
 
 class EditorJourneyTest extends TestCase
@@ -383,5 +394,52 @@ class EditorJourneyTest extends TestCase
         }
         $this->assertStringNotContainsString('/ja/posts/second-guide', $xml);
         $this->assertStringNotContainsString('/ja/posts/second-guide', $markdown);
+    }
+
+    public function test_og_render_source_and_report_aggregation_agree_with_locale_metadata(): void
+    {
+        Http::preventStrayRequests();
+        $post = Post::findOrFail(1);
+        $scores = [];
+        $generator = new class(app(OgImageManager::class)) extends OgImageGenerator
+        {
+            public function html(SEOData $data): string
+            {
+                return $this->renderHtml($data, 'seo::og.default');
+            }
+        };
+        $directory = storage_path('app/surface-evidence');
+        if (! is_dir($directory)) {
+            mkdir($directory, 0700, true);
+        }
+        foreach ($post->getTranslations('slug') as $locale => $slug) {
+            $data = app(SEOResolver::class)->resolve($post, locale: $locale);
+            $html = $generator->html($data);
+            $title = $post->seoMetaForLocale($locale)->firstOrFail()->title;
+            $this->assertStringContainsString(e($title), $html);
+            $this->assertStringContainsString('lang="'.str_replace('_', '-', $locale).'"', $html);
+            file_put_contents($directory.'/og-'.$locale.'.html', $html);
+            try {
+                app()->setLocale($locale);
+                $score = app(SeoScorer::class)->score(app(PageScanner::class)->scan($post));
+            } finally {
+                app()->setLocale('en');
+            }
+            $scores[] = $score->score;
+            SEOScanResult::query()->create([
+                'target_key' => 'fixture-'.$locale, 'url' => url('/'.$locale.'/posts/'.rawurlencode($slug)),
+                'score' => $score->score, 'rubric_version' => $score->rubricVersion,
+                'penalty_total' => $score->penaltyTotal, 'scored_issues' => $score->scoredIssues(),
+                'breakdown' => $score->breakdown, 'keywords_enabled' => false, 'scored_at' => now(),
+            ]);
+        }
+        $report = app(ReportDataBuilder::class)->build(Branding::fromConfig());
+        $this->assertSame(6, $report->data->score['scannedTargets']);
+        $this->assertSame((int) round(array_sum($scores) / count($scores)), $report->data->score['value']);
+        $this->assertSame('en', $report->data->presentation->language);
+        $html = app(ReportGenerator::class)->renderHtml($report->data);
+        $this->assertStringContainsString('lang="en"', $html);
+        file_put_contents($directory.'/report-en.html', $html);
+        $this->assertSame('en', app()->getLocale());
     }
 }
