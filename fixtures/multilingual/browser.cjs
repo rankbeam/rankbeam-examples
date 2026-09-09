@@ -17,6 +17,7 @@ const { chromium } = require('playwright');
     await Promise.all([page.waitForResponse(r=>r.request().method()==='POST'&&r.url().includes('livewire')),page.locator('#activeLocale').selectOption(locale)]);
    }
    if(expected) await page.waitForFunction(value=>document.querySelector('[id="form.seo_meta.title"]').value===value,expected);
+   if(expected) await page.waitForFunction(locale=>document.querySelector('.serp-url')?.textContent.includes('/'+locale+'/posts/'),locale);
   }
   const saved = async locale => {
    const slug={en:'coffee-at-home',it:'caffè-a-casa',ja:'自宅のコーヒー'}[locale];
@@ -30,8 +31,10 @@ const { chromium } = require('playwright');
   await page.waitForURL(url=>!url.pathname.endsWith('/login'));
   await page.goto(base+'/admin/posts/1/edit');
   await changeLocale('it','Il caffè a casa');
+  assert((await page.locator('[x-data]').evaluateAll(nodes=>nodes.filter(n=>n.getAttribute('x-data').includes('seoTitle:')).map(n=>Alpine.$data(n).url)))[0].includes('/it/posts/'));
   await field('seo_meta.title').fill('Una bozza di caffè');
   await changeLocale('ja','自宅で淹れるコーヒー');
+  assert((await page.locator('[x-data]').evaluateAll(nodes=>nodes.filter(n=>n.getAttribute('x-data').includes('seoTitle:')).map(n=>Alpine.$data(n).url)))[0].includes('/ja/posts/'));
   await field('seo_meta.title').fill('コーヒーの下書き');
   await changeLocale('it','Una bozza di caffè');
   assert((await saved('it')).includes('<title>Il caffè a casa</title>'));
