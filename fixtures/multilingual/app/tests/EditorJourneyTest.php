@@ -442,4 +442,14 @@ class EditorJourneyTest extends TestCase
         file_put_contents($directory.'/report-en.html', $html);
         $this->assertSame('en', app()->getLocale());
     }
+
+    public function test_early_cached_form_is_rebuilt_for_destination_preview_and_budget(): void
+    {
+        $post = $this->fixturePost();
+        Livewire::test(EditPost::class, ['record' => $post->getKey()])
+            ->call('switchWithEarlyFormCache', 'ja')
+            ->assertSet('previewProbe.url', url('/ja/posts/integration-ja'))
+            ->assertSet('previewProbe.thresholds.titleMax', 30)
+            ->assertSet('data.seo_meta.title', '日本語のSEOタイトル');
+    }
 }
