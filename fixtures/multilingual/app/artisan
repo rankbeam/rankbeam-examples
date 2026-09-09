@@ -1,0 +1,26 @@
+#!/usr/bin/env php
+<?php
+
+use Illuminate\Foundation\Application;
+use Symfony\Component\Console\Input\ArgvInput;
+
+define('LARAVEL_START', microtime(true));
+
+// PHP 8.4: silence E_DEPRECATED during autoload (transitive deps).
+if (PHP_VERSION_ID >= 80400) {
+    $originalErrorReporting = error_reporting();
+    error_reporting($originalErrorReporting & ~E_DEPRECATED);
+}
+
+require __DIR__.'/vendor/autoload.php';
+
+if (PHP_VERSION_ID >= 80400 && isset($originalErrorReporting)) {
+    error_reporting($originalErrorReporting);
+}
+
+/** @var Application $app */
+$app = require_once __DIR__.'/bootstrap/app.php';
+
+$status = $app->handleCommand(new ArgvInput);
+
+exit($status);
