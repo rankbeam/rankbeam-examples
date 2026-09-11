@@ -18,7 +18,7 @@
         }
     },
     "repositories": [
-        { "type": "composer", "url": "https://laravel-seo-pro.composer.sh" },
+        { "type": "composer", "url": "https://blog.rankbeam.dev/composer" },
         { "type": "path", "url": "/shared/examples-shared", "options": { "symlink": false } }
     ],
     "config": {
