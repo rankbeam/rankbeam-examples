@@ -49,6 +49,17 @@ export function assertStaticContract(
   const where = label ? `${label}:${pg.key}` : pg.key
   const m = (s: string) => `[${where}] ${s}`
 
+  // Inertia serializers can stringify explicitly supplied undefined props.
+  // Content itself may legitimately say "null"; inspect structural attributes.
+  const structuralAttributes = [
+    ...head.metas.flatMap((meta) => [meta.name, meta.property]),
+    ...head.links.flatMap((link) => [link.rel, link.hreflang, link.href]),
+  ]
+  expect(
+    structuralAttributes.filter((value) => value === 'undefined' || value === 'null'),
+    m('optional head attributes are omitted, never stringified'),
+  ).toEqual([])
+
   // ── §1 Title — exactly one, resolved, suffix applied EXACTLY once ──────────
   expect(head.titleCount, m('exactly one <title>')).toBe(1)
   expect(head.title, m('resolved title value')).toBe(e.title)
