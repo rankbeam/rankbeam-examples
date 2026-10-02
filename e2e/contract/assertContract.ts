@@ -31,9 +31,9 @@ const SUFFIX = fixtures.config.title_suffix // " | Rankbeam"
 export type ContractOpts = {
   /**
    * Require the data-seo-schema / data-seo-url markers on the JSON-LD script.
-   * True for Blade & Livewire (TagRenderer::renderSchema emits them; Livewire
-   * needs them for teardown). False for Inertia, whose JSON-LD goes through the
-   * head-key prop recipe and is deduped by Inertia, not by the marker.
+   * TagRenderer::renderSchema emits them for Blade/Livewire; Inertia's root
+   * view also supplies them for its router cleanup. Callers can request this
+   * additional marker assertion independently of JSON-LD content checks.
    */
   requireSchemaMarker?: boolean
 }
@@ -170,7 +170,7 @@ export function assertStaticContract(
   // ── §1 Per-page JSON-LD — parseable, </script>-safe, no accumulation ────────
   if (e.schema.present) {
     // Exactly one JSON-LD block — the no-accumulation invariant across every
-    // stack (Inertia dedups by head-key; Livewire tears down by data-seo-url).
+    // stack (the Inertia router and Livewire cleanup use data-seo-url).
     expect(head.jsonld.length, m('exactly one JSON-LD script (no accumulation)')).toBe(1)
     const block = head.jsonld[0]
     if (opts.requireSchemaMarker) {

@@ -16,9 +16,8 @@ import { assertCanonicalQueryStrip, assertNoindexIsolation } from '../contract/s
  * warnings, and — separately, with JavaScript disabled — that SSR emits the full
  * contract in the raw HTTP HTML (§5).
  *
- * JSON-LD here flows through the head-key prop recipe, so it carries no
- * data-seo-schema marker (Inertia dedups by head-key) — requireSchemaMarker is
- * intentionally false.
+ * JSON-LD is emitted by the root Blade view and reconciled by the router,
+ * independently of the Inertia head manager and its SSR service.
  */
 
 /** The SSR base URL for the current project, set by CI once inertia:start-ssr is up. */
@@ -125,7 +124,7 @@ test.describe('Inertia — SSR crawler visibility (JavaScript disabled)', () => 
 })
 
 test.describe('Inertia — CSR-only non-compliance (JavaScript disabled)', () => {
-  test('CSR-only content has no crawler-visible SEO metadata', async ({ browser }) => {
+  test('CSR-only omits client head metadata while root-view JSON-LD remains', async ({ browser }) => {
     const env = test.info().project.metadata?.csrUrlEnv as string | undefined
     const CSR_URL = env ? process.env[env] : undefined
     test.skip(!CSR_URL, `${env ?? 'INERTIA_*_CSR_URL'} not set — optional CSR-only contract §5 check`)
@@ -153,7 +152,9 @@ test.describe('Inertia — CSR-only non-compliance (JavaScript disabled)', () =>
         metasByName(head, 'twitter:card'),
         '[csr-only:rich] Twitter metadata is absent from raw HTML',
       ).toHaveLength(0)
-      expect(head.jsonld, '[csr-only:rich] JSON-LD is absent from raw HTML').toHaveLength(0)
+      expect(head.jsonld, '[csr-only:rich] root-view JSON-LD remains in raw HTML').toHaveLength(1)
+      expect(JSON.parse(head.jsonld[0].raw)['@type']).toBe(rich.expect.schema.type)
+      expect(head.jsonld[0].raw.toLowerCase()).not.toContain('</script>')
     } finally {
       await ctx.close()
     }
