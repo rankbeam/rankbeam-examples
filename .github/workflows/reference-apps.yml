@@ -86,18 +86,24 @@ jobs:
         include:
           - stack: inertia-vue
             port: 8211
+            csr_port: 8311
             project: inertia-vue
             ssr_env: INERTIA_VUE_SSR_URL
+            csr_env: INERTIA_VUE_CSR_URL
             url_env: INERTIA_VUE_URL
           - stack: inertia-react
             port: 8212
+            csr_port: 8312
             project: inertia-react
             ssr_env: INERTIA_REACT_SSR_URL
+            csr_env: INERTIA_REACT_CSR_URL
             url_env: INERTIA_REACT_URL
           - stack: inertia-svelte
             port: 8213
+            csr_port: 8313
             project: inertia-svelte
             ssr_env: INERTIA_SVELTE_SSR_URL
+            csr_env: INERTIA_SVELTE_CSR_URL
             url_env: INERTIA_SVELTE_URL
     steps:
       - uses: actions/checkout@v4
@@ -124,6 +130,7 @@ jobs:
         working-directory: rankbeam-examples/apps/${{ matrix.stack }}
         run: |
           php artisan serve --host=127.0.0.1 --port=${{ matrix.port }} &
+          INERTIA_SSR_ENABLED=false php artisan serve --host=127.0.0.1 --port=${{ matrix.csr_port }} &
           php artisan inertia:start-ssr &
       - name: e2e
         working-directory: rankbeam-examples/e2e
@@ -133,10 +140,12 @@ jobs:
           npm ci
           npx playwright install --with-deps chromium
           npx wait-on http://127.0.0.1:${{ matrix.port }}/up
+          npx wait-on http://127.0.0.1:${{ matrix.csr_port }}/up
           # With the SSR server up, the normal URL returns SSR HTML, so the SSR
           # leg targets the same base URL (JS-disabled context).
           export ${{ matrix.url_env }}=http://127.0.0.1:${{ matrix.port }}
           export ${{ matrix.ssr_env }}=http://127.0.0.1:${{ matrix.port }}
+          export ${{ matrix.csr_env }}=http://127.0.0.1:${{ matrix.csr_port }}
           npx playwright test --project=${{ matrix.project }}
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
