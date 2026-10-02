@@ -9,10 +9,7 @@ export default function Content({ seo, schema, content }) {
         {seo.meta.map((m) => (
           <meta
             key={m['head-key']}
-            head-key={m['head-key']}
-            name={m.name}
-            property={m.property}
-            content={m.content}
+            {...m}
           />
         ))}
         {seo.link.map((l) => (
@@ -20,7 +17,7 @@ export default function Content({ seo, schema, content }) {
             key={l['head-key']}
             head-key={l['head-key']}
             rel={l.rel}
-            hrefLang={l.hreflang}
+            {...(l.hreflang ? { hrefLang: l.hreflang } : {})}
             href={l.href}
           />
         ))}
